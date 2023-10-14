@@ -57,7 +57,7 @@ void LCD::set_move_algebraic_notation(char *notation) {
     this->algebraic_notation_lock = true;
     char *tmp = this->algebraic_notation;
     this->algebraic_notation = notation;
-    free(tmp);
+    delete tmp;
     this->algebraic_notation_lock = false;
 }
 
