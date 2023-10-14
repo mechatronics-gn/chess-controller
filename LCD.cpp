@@ -89,8 +89,14 @@ void LCD::update() {
         }
         goto PRINT_TIME;
     } else if (this->state == LCD_STATE_WAIT_PLAYER) {
-        char *from_coord = this->is_from_set ? coord_display(this->from) : new char[3] {' ', ' ', '\0'};
-        char *to_coord = this->is_to_set ? coord_display(this->to) : new char[3] {' ', ' ', '\0'};
+        char *from_coord = this->is_from_set ? coord_display(this->from)
+                           : (millis() / 1000) % 4 > 2
+                               ? new char[3]{'_', '_', '\0'}
+                               : new char[3]{' ', ' ', '\0'};
+        char *to_coord = this->is_to_set ? coord_display(this->to)
+                         : (this->is_from_set && (millis() / 1000) % 4 > 2)
+                             ? new char[3]{'_', '_', '\0'}
+                             : new char[3]{' ', ' ', '\0'};
         this->lc->print(sprintf(" You: %s -> %s  ", from_coord, to_coord));
         delete from_coord;
         delete to_coord;
