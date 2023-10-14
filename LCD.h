@@ -5,8 +5,8 @@
 
 #include "Coord.h"
 
-#define LCD_COLS (2)
-#define LCD_ROWS (16)
+#define LCD_COLS (16)
+#define LCD_ROWS (2)
 
 /* This displays a simple hello message */
 #define LCD_STATE_HELLO (0)
