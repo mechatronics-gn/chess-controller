@@ -103,12 +103,10 @@ void LCD::update() {
         goto PRINT_TIME;
     } else if (this->state == LCD_STATE_VICTORY) {
         this->lc->print("    Victory!    ");
-        this->lc->setCursor(0, 1);
-        this->lc->print("                ");
+        goto PRINT_TIME;
     } else if (this->state == LCD_STATE_GAMEOVER) {
         this->lc->print("   Game  Over   ");
-        this->lc->setCursor(0, 1);
-        this->lc->print("                ");
+        goto PRINT_TIME;
     } else if (this->state == LCD_STATE_WARN_PLAYER) {
         this->lc->print(" Illegal! Retry ");
         goto PRINT_TIME;
