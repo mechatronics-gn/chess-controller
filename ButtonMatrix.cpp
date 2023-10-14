@@ -17,6 +17,7 @@ ButtonMatrix::ButtonMatrix(struct HC595Pin hc595pin, struct HC165Pin hc165pin) {
 struct Coord *ButtonMatrix::pushed() {
     /* First check if only one column is HIGH */
     this->write_row(0xFF);
+    delayMicroseconds(10);
     int high_col = this->high_col();
     if (high_col < 0) return nullptr;
 
@@ -31,6 +32,7 @@ struct Coord *ButtonMatrix::pushed() {
         uint8_t rear_data = (1 << (8 - rear)) - 1;
 
         this->write_row(floor_data - mid_data);
+        delayMicroseconds(10);
         int left = this->high_col();
         if (left == high_col) {
             rear = mid;
