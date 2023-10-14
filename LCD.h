@@ -4,6 +4,7 @@
 #include <LiquidCrystal_I2C.h>
 
 #include "Coord.h"
+#include "Timer.h"
 
 #define LCD_COLS (16)
 #define LCD_ROWS (2)
@@ -22,6 +23,8 @@
 #define LCD_STATE_VICTORY (5)
 /* This is cpu victory */
 #define LCD_STATE_GAMEOVER (6)
+/* This warns player for trying an illegal move */
+#define LCD_STATE_WARN_PLAYER (7)
 
 #define LCD_EDIT_TARGET_NONE (0)
 #define LCD_EDIT_TARGET_FROM (1)
@@ -29,7 +32,7 @@
 
 class LCD {
    public:
-    LCD(uint8_t addr);
+    LCD(uint8_t addr, Timer *timer);
 
     void set_state(uint8_t state);
 
@@ -38,7 +41,11 @@ class LCD {
      */
     void set_edit_target(uint8_t target);
     void set_edit_value(struct Coord coord);
+    void reset_edit_target(uint8_t target);
 
+    /**
+     * Notation must be shorter than 8 characters (excluding \0)
+    */
     void set_move_algebraic_notation(char *notation);
 
     void update();
@@ -46,10 +53,13 @@ class LCD {
    private:
     uint8_t addr;
     LiquidCrystal_I2C *lc;
+    Timer *timer;
 
     uint8_t state;
 
+    bool is_from_set;
     struct Coord from;
+    bool is_to_set;
     struct Coord to;
 
     uint8_t edit_target;
@@ -59,5 +69,7 @@ class LCD {
 };
 
 char *coord_display(struct Coord coord);
+
+char *time_display(uint32_t time);
 
 #endif
