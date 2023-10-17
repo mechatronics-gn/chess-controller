@@ -64,7 +64,7 @@ void setup() {
     lcd->update();
     cancelbtn->update();
 
-    Serial.begin(115200);
+    Serial.begin(9600);
     Serial.write(MESSAGE_OUT_RESET_GAME); /* Hey, I'm here! */
     delay(1000);
 }
