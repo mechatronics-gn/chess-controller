@@ -28,6 +28,8 @@
 #define MESSAGE_OUT_RESET_GAME (0xAB)
 /* Write my coords */
 #define MESSAGE_OUT_COORDS (0xAC)
+/* Timeout */
+#define MESSAGE_OUT_TIMEOUT (0xAD)
 
 /* Game input processing states */
 
@@ -179,6 +181,15 @@ void loop() {
 
 SKIP_CANCELBTN:
     if (x != nullptr) delete x;
+
+    if(state == GAME_STATE_WAIT_INPUT_FROM || state == GAME_STATE_WAIT_INPUT_TO) {
+        if(timer->read() == 0) {
+            state = GAME_STATE_DONE;
+            timer->pause();
+            lcd->set_state(LCD_STATE_GAMEOVER);
+            Serial.write(MESSAGE_OUT_TIMEOUT);
+        }
+    }
 
     /* Phase 3: Update LCD and button */
     lcd->update();
