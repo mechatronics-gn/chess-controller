@@ -26,12 +26,12 @@ struct Coord *ButtonMatrix::pushed() {
         delayMicroseconds(5);
         int mid = (floor + rear) / 2;
 
-        /* Some clever bitwise magic */
-        uint8_t floor_data = (1 << (8 - floor)) - 1;
-        uint8_t mid_data = (1 << (8 - mid)) - 1;
-        uint8_t rear_data = (1 << (8 - rear)) - 1;
+        uint8_t data = 0;
+        for(int i=floor; i<mid; i++) {
+            data |= row_mask[i];
+        }        
 
-        this->write_row(floor_data - mid_data);
+        this->write_row(data);
         delayMicroseconds(10);
         int left = this->high_col();
         if (left == high_col) {
@@ -55,7 +55,7 @@ int ButtonMatrix::high_col() {
     digitalWrite(this->hc165pin.clock, HIGH);
     digitalWrite(this->hc165pin.clockEnable, LOW);
     uint8_t data =
-        ~shiftIn(this->hc165pin.data, this->hc165pin.clock, MSBFIRST);
+        ~shiftIn(this->hc165pin.data, this->hc165pin.clock, LSBFIRST);
     digitalWrite(this->hc165pin.clockEnable, HIGH);
 
     int ret = -1;
@@ -76,6 +76,6 @@ int ButtonMatrix::high_col() {
 
 void ButtonMatrix::write_row(uint8_t data) {
     digitalWrite(this->hc595pin.latch, LOW);
-    shiftOut(this->hc595pin.data, this->hc595pin.clock, MSBFIRST, data);
+    shiftOut(this->hc595pin.data, this->hc595pin.clock, LSBFIRST, data);
     digitalWrite(this->hc595pin.latch, HIGH);
 }
