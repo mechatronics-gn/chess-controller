@@ -73,7 +73,10 @@ void LCD::update() {
     } else if (this->state == LCD_STATE_MOVING_CPU) {
         if (!this->algebraic_notation_lock) {
             this->algebraic_notation_lock = true;
-            this->lc->print(sprintf(" CPU: %s", this->algebraic_notation));
+            char buff[20];
+            sprintf(buff, " CPU: %s", this->algebraic_notation);    
+            this->lc->print(buff);
+            this->lc->print("                ");
             this->algebraic_notation_lock = false;
         } else {
             this->lc->print(" CPU:           ");
@@ -82,7 +85,10 @@ void LCD::update() {
     } else if (this->state == LCD_STATE_MOVING_PLAYER) {
         if (!this->algebraic_notation_lock) {
             this->algebraic_notation_lock = true;
-            this->lc->print(sprintf(" You: %s", this->algebraic_notation));
+            char buff[20];
+            sprintf(buff, " You: %s", this->algebraic_notation);
+            this->lc->print(buff);
+            this->lc->print("                ");
             this->algebraic_notation_lock = false;
         } else {
             this->lc->print(" You:           ");
@@ -90,28 +96,29 @@ void LCD::update() {
         goto PRINT_TIME;
     } else if (this->state == LCD_STATE_WAIT_PLAYER) {
         char *from_coord = this->is_from_set ? coord_display(this->from)
-                           : (millis() / 1000) % 4 > 2
+                           : (millis() / 200) % 5 > 1
                                ? new char[3]{'_', '_', '\0'}
                                : new char[3]{' ', ' ', '\0'};
         char *to_coord = this->is_to_set ? coord_display(this->to)
-                         : (this->is_from_set && (millis() / 1000) % 4 > 2)
+                         : (this->is_from_set && (millis() / 200) % 5 > 1)
                              ? new char[3]{'_', '_', '\0'}
                              : new char[3]{' ', ' ', '\0'};
-        this->lc->print(sprintf(" You: %s -> %s  ", from_coord, to_coord));
+        char buff[20];
+        sprintf(buff, " You: %s -> %s  ", from_coord, to_coord);
+        this->lc->print(buff);
         delete from_coord;
         delete to_coord;
         goto PRINT_TIME;
     } else if (this->state == LCD_STATE_VICTORY) {
         this->lc->print("    Victory!    ");
-        goto PRINT_TIME;
     } else if (this->state == LCD_STATE_GAMEOVER) {
         this->lc->print("   Game  Over   ");
-        goto PRINT_TIME;
     } else if (this->state == LCD_STATE_WARN_PLAYER) {
         this->lc->print(" Illegal! Retry ");
         goto PRINT_TIME;
+    } else if (this->state == LCD_STATE_DRAW) {
+        this->lc->print("      Draw      ");
     }
-
     return;
 PRINT_TIME:
     this->lc->setCursor(4, 1);

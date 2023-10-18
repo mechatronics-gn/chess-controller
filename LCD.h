@@ -25,6 +25,8 @@
 #define LCD_STATE_GAMEOVER (6)
 /* This warns player for trying an illegal move */
 #define LCD_STATE_WARN_PLAYER (7)
+/* This is draw (possibly stalemate) */
+#define LCD_STATE_DRAW (8)
 
 #define LCD_EDIT_TARGET_NONE (0)
 #define LCD_EDIT_TARGET_FROM (1)

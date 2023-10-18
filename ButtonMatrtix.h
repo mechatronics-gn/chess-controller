@@ -48,6 +48,9 @@ class ButtonMatrix {
      * Write HIGH or LOW to each row.
     */
     void write_row(uint8_t data);
+
+    struct Coord *last;
+    bool is_new;
 };
 
 #endif

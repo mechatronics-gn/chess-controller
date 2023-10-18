@@ -19,7 +19,7 @@ struct Coord *ButtonMatrix::pushed() {
     this->write_row(0xFF);
     delayMicroseconds(10);
     int high_col = this->high_col();
-    if (high_col < 0) return nullptr;
+    if (high_col < 0) { delete this->last; this->last = nullptr; return nullptr; }
 
     int floor = 0, rear = 8;
     while (rear > floor + 1) {
@@ -39,10 +39,19 @@ struct Coord *ButtonMatrix::pushed() {
         } else if (left == -1) {
             floor = mid;
         } else {
+            delete this->last;
+            this->last = nullptr;
             return nullptr;
         }
     }
 
+    if(this->last != nullptr) {
+        if(this->last->x == high_col && this->last->y == floor) {
+            return nullptr;
+        }
+    }
+
+    this->last = new Coord{.x = (uint8_t)high_col, .y = (uint8_t)floor};
     return new Coord{.x = (uint8_t)high_col, .y = (uint8_t)floor};
 }
 

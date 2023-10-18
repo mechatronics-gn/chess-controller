@@ -20,6 +20,7 @@ void Timer::resume() {
 }
 
 void Timer::reset(uint32_t time) {
+    this->offset_millis = millis();
     this->is_running = false;
     this->leftover_millis = time;
 }

@@ -21,6 +21,8 @@
 #define MESSAGE_IN_YOUR_WIN (0x06)
 /* It is cpu win */
 #define MESSAGE_IN_CPU_WIN (0x07)
+/* It is draw */
+#define MESSAGE_IN_DRAW (0x08)
 
 /* Outbound messages */
 
@@ -30,6 +32,8 @@
 #define MESSAGE_OUT_COORDS (0xAC)
 /* Timeout */
 #define MESSAGE_OUT_TIMEOUT (0xAD)
+/* Debug */
+#define MESSAGE_OUT_DEBUG (0xAE)
 
 /* Game input processing states */
 
@@ -68,13 +72,15 @@ void setup() {
 
     Serial.begin(9600);
     Serial.write(MESSAGE_OUT_RESET_GAME); /* Hey, I'm here! */
-    delay(1000);
+    Serial.write(MESSAGE_OUT_DEBUG);
+    Serial.println("Debug Test");
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    /* // Test btnmtx
-    auto *x = btnmtx->pushed()/;
+    // Test btnmtx
+    /*
+    auto *x = btnmtx->pushed();
     if(x != nullptr) {
         Serial.print("Coord: (");
         Serial.print(x->x);
@@ -85,7 +91,7 @@ void loop() {
     }
     delay(1);
     */
-
+    
     /* Phase 1: Read from Serial */
     if (Serial.available()) {
         byte inc = Serial.read();
@@ -95,15 +101,20 @@ void loop() {
             Serial.readBytes(arr, 4);
             uint32_t game_duration = 0;
             for (int i = 0; i < 4; i++) {
+                game_duration <<= 8;
                 game_duration += arr[i];
-                game_duration << 8;
             }
 
             timer->reset(game_duration);
+            Serial.write(MESSAGE_OUT_DEBUG);
+            Serial.print("Resetting timer with game_duration ");
+            Serial.println(game_duration);
             state = GAME_STATE_STANDBY;
             lcd->set_state(LCD_STATE_STANDBY);
         } else if (inc == MESSAGE_IN_GIVEN_COORDS_OK) {
             state = GAME_STATE_NONE;
+            Serial.write(MESSAGE_OUT_DEBUG);
+            Serial.println("Got coords ok");
             lcd->set_move_algebraic_notation(new char[1]{'\0'});
             lcd->set_state(LCD_STATE_MOVING_PLAYER);
         } else if (inc == MESSAGE_IN_GIVEN_COORDS_ERROR) {
@@ -115,6 +126,11 @@ void loop() {
             char *exp = new char[len + 1];
             Serial.readBytes(exp, len);
             exp[len] = '\0';
+            Serial.write(MESSAGE_OUT_DEBUG);
+            Serial.print("Got exp with len ");
+            Serial.print(len);
+            Serial.print(" and content ");
+            Serial.println(exp);
             lcd->set_move_algebraic_notation(exp);
         } else if (inc == MESSAGE_IN_YOUR_TURN) {
             state = GAME_STATE_WAIT_INPUT_FROM;
@@ -132,6 +148,10 @@ void loop() {
             state = GAME_STATE_DONE;
             timer->pause();
             lcd->set_state(LCD_STATE_GAMEOVER);
+        } else if (inc == MESSAGE_IN_DRAW) {
+            state = GAME_STATE_DONE;
+            timer->pause();
+            lcd->set_state(LCD_STATE_DRAW);
         }
     }
 
@@ -146,12 +166,14 @@ void loop() {
             from = *x;
             lcd->set_edit_target(LCD_EDIT_TARGET_FROM);
             lcd->set_edit_value(from);
+            lcd->set_state(LCD_STATE_WAIT_PLAYER);
 
             state = GAME_STATE_WAIT_INPUT_TO;
         } else if (state == GAME_STATE_WAIT_INPUT_TO) {
             to = *x;
             lcd->set_edit_target(LCD_EDIT_TARGET_TO);
             lcd->set_edit_value(to);
+            lcd->set_state(LCD_STATE_WAIT_PLAYER);
 
             /* Send current coords to Serial*/
             Serial.write(MESSAGE_OUT_COORDS);
@@ -161,6 +183,9 @@ void loop() {
             Serial.write(to.y);
             state = GAME_STATE_NONE;
             timer->pause();
+
+            lcd->reset_edit_target(LCD_EDIT_TARGET_FROM);
+            lcd->reset_edit_target(LCD_EDIT_TARGET_TO);
 
             goto SKIP_CANCELBTN;
         } else if (state == GAME_STATE_DONE) {
